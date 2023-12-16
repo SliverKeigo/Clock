@@ -73,9 +73,11 @@ const Wrapper = styled.div<ClockProps>`
   & .day-second {
     stroke: grey; // 亮色模式下的灰色
   }
+
   & .day-minute {
     stroke: darkgrey;
   }
+
   & .day-hour {
     stroke: dimgrey;
   }
@@ -89,20 +91,25 @@ const Wrapper = styled.div<ClockProps>`
   & line.second {
     stroke-width: 3;
       //transform: ${x => `rotate(${x.s * 6 + x.ms * 6 / 1000}deg)`};
-    transition: transform 1s linear; // 添加平滑过渡效果
+    //transition: transform 1s linear; // 添加平滑过渡效果
   }
 
   & line.minute {
     stroke-width: 5;
       // transform: ${x => `rotate(${x.m * 6}deg)`};
-    transition: transform 0.1s linear; // 添加平滑过渡效果
+    //transition: transform 0.1s linear; // 添加平滑过渡效果
   }
 
   & line.hour {
     stroke-width: 7;
       // transform: ${x => `rotate(${x.h * 30 + x.m / 2}deg)`};
-    transition: transform 0.1s linear; // 添加平滑过渡效果
+    //transition: transform 0.1s linear; // 添加平滑过渡效果
   }
+
+  .hand:hover {
+    cursor: pointer;
+  }
+
 
 `;
 
@@ -113,48 +120,69 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
   const minutes = now.getMinutes();
   const seconds = now.getSeconds();
   const milliseconds = now.getMilliseconds();
+  const [hoveredHand, setHoveredHand] = useState(null); // 'hour', 'minute', 'second' 或 null
+
+  const handleMouseEnter = ({handType}: { handType: any }) => {
+    setHoveredHand(handType);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredHand(null);
+  };
+
+
+
 
   // 计算秒针的初始角度，考虑到当前秒和毫秒
   const initialSecondHandAngle = (seconds + milliseconds / 1000) * 6;
   // 计算时针的初始角度
-  const initialHourHandAngle = ((hours % 24) * 15) + (minutes * 0.25);
+  const initialHourHandAngle = ((hours % 12) * 30) + (minutes * 0.5);
   // 计算分针的初始角度
   const initialMinuteHandAngle = minutes * 6 + seconds * 0.1;
   // 样式对象，包含秒针的初始旋转和CSS动画
   const secondHandStyle = {
     transform: `rotate(${initialSecondHandAngle}deg)`,
-    transition: 'transform 0.0005s linear', // 平滑过渡到动画开始的角度
-    animation: `smoothSecondHand 60s linear infinite ${60 - seconds}s`
+    transition: 'transform 0.5s linear', // 秒针平滑过渡
+    animation: `smoothSecondHand 1s linear infinite`
   };
-  // 样式对象，包含时针和分针的初始旋转
+
   const hourHandStyle = {
-    transform: `rotate(${initialHourHandAngle}deg)`
+    transform: `rotate(${initialHourHandAngle}deg)`,
+    transition: 'transform 0.1s linear' // 时针平滑过渡
   };
+
   const minuteHandStyle = {
-    transform: `rotate(${initialMinuteHandAngle}deg)`
+    transform: `rotate(${initialMinuteHandAngle}deg)`,
+    transition: 'transform 0.05s linear' // 分针平滑过渡
   };
 
   // 计算每个小时数字的位置
   const renderHourMarks = () => {
     const marks = [];
-    const radius = 98; // 半径值
-    for (let i = 0; i < 24; i++) {
-      const angle = Math.PI / 12 * (i - 6); // 24小时制，每个小时间隔为15°
+    const radius = 78; // 半径值
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.PI / 6 * (i - 3); // 24小时制，每个小时间隔为15°
       const x = radius * Math.cos(angle); // 根据圆的半径和角度计算 x 坐标
       const y = radius * Math.sin(angle); // 根据圆的半径和角度计算 y 坐标
       // 每3小时加粗字体
       const isHourMark = i % 3 === 0;
       marks.push(
         <text key={i}
-              style={{fontFamily: "'JetBrains Mono', monospace"}}
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+
+              }}
+
               x={x}
               y={y}
               textAnchor="middle"
               dominantBaseline="central"
-              fontSize={isHourMark ? "10" : "8"} // 加粗的字体稍大
+              fontSize={isHourMark ? "8" : "6"} // 加粗的字体稍大
               fontWeight={isHourMark ? "bold" : "normal"} // 加粗
               fill={isNightMode ? '#FFF0F5' : 'black'}>
-          {i}
+          {i == 0 ? 12 : i}
         </text>
       );
     }
@@ -162,26 +190,30 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
   };
   const renderMinuteMarks = () => {
     const marks = [];
-    const radius = 110; // 可以选择一个适合的半径
+    const radius = 90; // 可以选择一个适合的半径
     for (let i = 0; i < 60; i++) {
       // 每分钟间隔为6°
       const angle = Math.PI / 30 * (i - 15); // 调整角度，使12点位置为0度
       const x = radius * Math.cos(angle);
       const y = radius * Math.sin(angle);
 
-
       // 每5分钟加粗字体
       const isMinuteMark = i % 5 === 0;
       marks.push(
         <text key={i}
-              style={{fontFamily: "'JetBrains Mono', monospace"}}
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+              }}
               x={x}
               y={y}
               textAnchor="middle"
               dominantBaseline="central"
-              fontSize={isMinuteMark ? "8" : "6"} // 加粗的字体稍大
+              fontSize={isMinuteMark ? "6" : "4"} // 加粗的字体稍大
               fontWeight={isMinuteMark ? "bold" : "normal"} // 加粗
               fill={isNightMode ? '#FFF0F5' : 'black'}>
+          {/*{i % 5 == 0 ? i / 5 == 0 ? 12 : i / 5 : i}*/}
           {i}
         </text>
       );
@@ -198,34 +230,107 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
         {renderMinuteMarks()}
         {/* 秒针 */}
         <line y1={15}
-              y2={-105}
+              y2={-94}
               className={`hand second ${isNightMode ? 'night-second' : 'day-second'}`}
               style={secondHandStyle}
+              onMouseEnter={() => handleMouseEnter({handType: 'second'})}
+              onMouseLeave={handleMouseLeave}
+
         />
         {/* 时针 */}
         <line y1={5}
               y2={-70}
               className={`hand hour ${isNightMode ? 'night-hour' : 'day-hour'}`}
               style={hourHandStyle}
+              onMouseEnter={() => handleMouseEnter({handType: 'hour'})}
+              onMouseLeave={handleMouseLeave}
         />
         {/* 分针 */}
         <line y1={10}
-              y2={-90}
+              y2={-88}
               className={`hand minute ${isNightMode ? 'night-minute' : 'day-minute'}`}
               style={minuteHandStyle}
+              onMouseEnter={() => handleMouseEnter({handType: 'minute'})}
+              onMouseLeave={handleMouseLeave}
         />
         <circle className={`center-circle ${isNightMode ? 'night-mode' : ''}`}/>
-        <text x="0"
-              y="-40"
-              style={{fontFamily: "'JetBrains Mono', monospace"}}
+        // 时
+        <text x="-13"
+              y="-105"
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+              }}
               textAnchor="middle"
               dominantBaseline="central"
               className={`center-text ${isNightMode ? 'night-mode' : ''}`}
-              fontSize="10"
-              fill={isNightMode ? '#FFF0F5' : '#696969'}>
-          {`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`}
+              fontSize="8"
+              fill={hoveredHand === 'hour' ? '#4169E1' : '#C0C0C0'}>
+          {h.toString().padStart(2, '0')}
         </text>
-    </g>
+        <text x="-6.5"
+              y="-106"
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+              }}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className={`center-text ${isNightMode ? 'night-mode' : ''}`}
+              fontSize="8"
+              fill={'#C0C0C0'}
+        >
+          {":"}
+        </text>
+        // 分
+        <text x="0"
+              y="-105"
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+
+              }}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className={`center-text ${isNightMode ? 'night-mode' : ''}`}
+              fontSize="8"
+              fill={hoveredHand === 'minute' ? '#4169E1' : '#C0C0C0'}> {/* 使用动态颜色 */}
+          {m.toString().padStart(2, '0')}
+        </text>
+        <text x="6.5"
+              y="-106"
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+              }}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className={`center-text ${isNightMode ? 'night-mode' : ''}`}
+              fontSize="8"
+              fill={'#C0C0C0'}
+        >
+          {":"}
+        </text>
+        // 秒
+        <text x="13"
+              y="-105"
+              style={{
+                fontFamily: "'Microsoft YaHei', monospace",
+                userSelect: "none", // 防止文本被选中
+                // cursor: "default",  // 可以设置为默认光标
+              }}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className={`center-text ${isNightMode ? 'night-mode' : ''}`}
+              fontSize="8"
+              fill={hoveredHand === 'second' ? '#4169E1' : '#C0C0C0'}> {/* 使用动态颜色 */}
+          {s.toString().padStart(2, '0')}
+        </text>
+      </g>
     </svg>);
 
 };
