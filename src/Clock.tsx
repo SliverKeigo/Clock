@@ -73,11 +73,9 @@ const Wrapper = styled.div<ClockProps>`
   & .day-second {
     stroke: grey; // 亮色模式下的灰色
   }
-
   & .day-minute {
     stroke: darkgrey;
   }
-
   & .day-hour {
     stroke: dimgrey;
   }
@@ -89,19 +87,19 @@ const Wrapper = styled.div<ClockProps>`
   }
 
   & line.second {
-    stroke-width: 1;
+    stroke-width: 3;
       //transform: ${x => `rotate(${x.s * 6 + x.ms * 6 / 1000}deg)`};
     transition: transform 1s linear; // 添加平滑过渡效果
   }
 
   & line.minute {
-    stroke-width: 3;
+    stroke-width: 5;
       // transform: ${x => `rotate(${x.m * 6}deg)`};
     transition: transform 0.1s linear; // 添加平滑过渡效果
   }
 
   & line.hour {
-    stroke-width: 5;
+    stroke-width: 7;
       // transform: ${x => `rotate(${x.h * 30 + x.m / 2}deg)`};
     transition: transform 0.1s linear; // 添加平滑过渡效果
   }
@@ -110,34 +108,31 @@ const Wrapper = styled.div<ClockProps>`
 
 const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
 
-  // React 组件中的状态和效果
-  const [secondHandAngle, setSecondHandAngle] = useState(() => {
-    const now = new Date();
-    return now.getSeconds() * 6; // 初始化角度，每秒6度
-  });
-  const [minuteHandAngle, setMinuteHandAngle] = useState(() => {
-    const now = new Date();
-    return now.getMinutes() * 6; // 每分钟6度
-  });
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
 
-  const [hourHandAngle, setHourHandAngle] = useState(() => {
-    const now = new Date();
-    // 24小时制，每小时15度，每分钟额外增加0.25度
-    return (now.getHours() * 15) + (now.getMinutes() * 0.25);
-  });
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // 每秒增加6度
-      setSecondHandAngle(prevAngle => prevAngle + 6);
-      // 每分钟增加0.1度
-      setMinuteHandAngle(prevAngle => prevAngle + 0.1);
-      // 每小时增加15度，所以每分钟增加15 / 60 = 0.25度
-      setHourHandAngle(prevAngle => prevAngle + 0.25);
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  // 计算秒针的初始角度，考虑到当前秒和毫秒
+  const initialSecondHandAngle = (seconds + milliseconds / 1000) * 6;
+  // 计算时针的初始角度
+  const initialHourHandAngle = ((hours % 24) * 15) + (minutes * 0.25);
+  // 计算分针的初始角度
+  const initialMinuteHandAngle = minutes * 6 + seconds * 0.1;
+  // 样式对象，包含秒针的初始旋转和CSS动画
+  const secondHandStyle = {
+    transform: `rotate(${initialSecondHandAngle}deg)`,
+    transition: 'transform 0.0005s linear', // 平滑过渡到动画开始的角度
+    animation: `smoothSecondHand 60s linear infinite ${60 - seconds}s`
+  };
+  // 样式对象，包含时针和分针的初始旋转
+  const hourHandStyle = {
+    transform: `rotate(${initialHourHandAngle}deg)`
+  };
+  const minuteHandStyle = {
+    transform: `rotate(${initialMinuteHandAngle}deg)`
+  };
 
   // 计算每个小时数字的位置
   const renderHourMarks = () => {
@@ -174,6 +169,7 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
       const x = radius * Math.cos(angle);
       const y = radius * Math.sin(angle);
 
+
       // 每5分钟加粗字体
       const isMinuteMark = i % 5 === 0;
       marks.push(
@@ -200,25 +196,24 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
       <g fill="#fff">
         {renderHourMarks()}
         {renderMinuteMarks()}
-        {/*<circle*/}
-        {/*  pathLength={"12"}*/}
-        {/*  className={`tick-mark hours ${isNightMode ? 'night-mode' : ''}`}/>*/}
-        {/*<circle*/}
-        {/*  pathLength={"60"}*/}
-        {/*  className={`tick-mark minutes ${isNightMode ? 'night-mode' : ''}`}/>*/}
+        {/* 秒针 */}
         <line y1={15}
               y2={-105}
               className={`hand second ${isNightMode ? 'night-second' : 'day-second'}`}
-              style={{transform: `rotate(${secondHandAngle}deg)`}}></line>
-        <line y1={10}
-              y2={-105}
-              className={`hand minute ${isNightMode ? 'night-minute' : 'day-minute'}`}
-              style={{transform: `rotate(${minuteHandAngle}deg)`}}></line>
+              style={secondHandStyle}
+        />
+        {/* 时针 */}
         <line y1={5}
-              y2={-88}
+              y2={-70}
               className={`hand hour ${isNightMode ? 'night-hour' : 'day-hour'}`}
-              style={{transform: `rotate(${hourHandAngle}deg)`}}></line>
-
+              style={hourHandStyle}
+        />
+        {/* 分针 */}
+        <line y1={10}
+              y2={-90}
+              className={`hand minute ${isNightMode ? 'night-minute' : 'day-minute'}`}
+              style={minuteHandStyle}
+        />
         <circle className={`center-circle ${isNightMode ? 'night-mode' : ''}`}/>
         <text x="0"
               y="-40"
