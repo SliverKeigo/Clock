@@ -147,7 +147,7 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
 
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
-    transition: 'transform 0.01s linear' // 时针平滑过渡
+    transition: 'transform 0.1s linear' // 时针平滑过渡
   };
 
   const minuteHandStyle = {
