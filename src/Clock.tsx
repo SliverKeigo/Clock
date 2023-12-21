@@ -140,19 +140,19 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
   // 样式对象，包含秒针的初始旋转和CSS动画
   const secondHandStyle = {
     transform: `rotate(${initialSecondHandAngle}deg)`,
-    transition: 'transform 0.05s linear', // 秒针平滑过渡
+    transition: 'transform 0.01s linear', // 秒针平滑过渡
     animation: `smoothSecondHand 1s linear infinite`
   };
 
 
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
-    transition: 'transform 0.1s linear' // 时针平滑过渡
+    transition: 'transform 0.01 linear' // 时针平滑过渡
   };
 
   const minuteHandStyle = {
     transform: `rotate(${initialMinuteHandAngle}deg)`,
-    transition: 'transform 0.05s linear' // 分针平滑过渡
+    transition: 'transform 0.01 linear' // 分针平滑过渡
   };
 
   // 计算每个小时数字的位置
