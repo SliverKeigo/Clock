@@ -130,8 +130,6 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
     setHoveredHand(null);
   };
 
-
-
   // 计算时针的初始角度
   const initialHourHandAngle = ((hours % 12) * 30) + (minutes * 0.5);
   // 计算分针的初始角度
@@ -141,6 +139,12 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
   // let secondHandAngle = (seconds + milliseconds / 1000) * 6;
   // 使用 useState 钩子来保存 secondHandAngle 变量的值
   const [secondHandAngle, setSecondHandAngle] = useState((seconds + milliseconds / 1000) * 6);
+// 设置秒针的样式
+  const secondHandStyle = {
+    transform: `rotate(${secondHandAngle}deg)`,
+    transition: 'transform 1s linear', // 秒针平滑过渡
+    // animation: `smoothSecondHand 1s linear infinite`
+  };
 
   // useEffect 钩子
   useEffect(() => {
@@ -176,13 +180,26 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
     }
   }
 
-  // 设置秒针的样式
-  const secondHandStyle = {
-    transform: `rotate(${secondHandAngle}deg)`,
-    transition: 'transform 1s linear', // 秒针平滑过渡
-    // animation: `smoothSecondHand 1s linear infinite`
-  };
+  // useEffect 钩子
+  useEffect(() => {
+    // 监听当前标签页的状态
+    window.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // 返回销毁监听器的函数
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // 处理当前标签页的状态变化
+  function handleVisibilityChange() {
+    // 如果当前标签页从隐藏状态切换到可见状态
+    if (document.visibilityState === 'visible') {
+      // 刷新页面
+      // 不再直接使用 location
+      window.location.reload();
+    }
+  }
 
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
