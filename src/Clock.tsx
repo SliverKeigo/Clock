@@ -134,7 +134,7 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
 
 
   // 计算秒针的初始角度，考虑到当前秒和毫秒
-  const initialSecondHandAngle = (seconds + milliseconds / 1000) * 6;
+  const initialSecondHandAngle = (seconds + milliseconds / 1000) % 60;
   // 计算时针的初始角度
   const initialHourHandAngle = ((hours % 12) * 30) + (minutes * 0.5);
   // 计算分针的初始角度
