@@ -138,7 +138,7 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
   // 计算秒针的当前角度
   // let secondHandAngle = (seconds + milliseconds / 1000) * 6;
   // 使用 useState 钩子来保存 secondHandAngle 变量的值
-  const [secondHandAngle, setSecondHandAngle] = useState((seconds + milliseconds / 1000) * 6);
+  const [secondHandAngle, setSecondHandAngle] = useState((seconds + milliseconds / 1000) * 6 + 3);
 // 设置秒针的样式
   const secondHandStyle = {
     transform: `rotate(${secondHandAngle}deg)`,
