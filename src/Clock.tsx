@@ -132,28 +132,66 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
 
 
 
-
-  // 计算秒针的初始角度，考虑到当前秒和毫秒
-  const initialSecondHandAngle = (seconds + milliseconds / 1000) * 6;
   // 计算时针的初始角度
   const initialHourHandAngle = ((hours % 12) * 30) + (minutes * 0.5);
   // 计算分针的初始角度
   const initialMinuteHandAngle = minutes * 6 + seconds * 0.1;
-  // 样式对象，包含秒针的初始旋转和CSS动画
+
+  // 计算秒针的当前角度
+  // let secondHandAngle = (seconds + milliseconds / 1000) * 6;
+  // 使用 useState 钩子来保存 secondHandAngle 变量的值
+  const [secondHandAngle, setSecondHandAngle] = useState((seconds + milliseconds / 1000) * 6);
+
+  // useEffect 钩子
+  useEffect(() => {
+    // 使用 setInterval() 函数每过一秒更新秒针的角度
+    const interval = setInterval(() => {
+      // 更新秒针的角度
+      setSecondHandAngle(secondHandAngle + 6);
+    }, 1000);
+
+    // 销毁定时器
+    return () => {
+      clearInterval(interval);
+    };
+
+  }, [secondHandAngle]);
+  // 处理当前标签页的状态变化
+  useEffect(() => {
+    // 监听当前标签页获得焦点事件
+    window.addEventListener('focus', handleFocus);
+
+    // 返回销毁监听器的函数
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  function handleFocus() {
+    // 如果当前标签页从隐藏状态切换到可见状态
+    if (document.visibilityState === 'visible') {
+      // 刷新页面
+      // 不再直接使用 location
+      window.location.reload();
+    }
+  }
+
+  // 设置秒针的样式
   const secondHandStyle = {
-    transform: `rotate(${initialSecondHandAngle}deg)`,
-    transition: 'transform 0.5s linear', // 秒针平滑过渡
-    animation: `smoothSecondHand 1s linear infinite`
+    transform: `rotate(${secondHandAngle}deg)`,
+    transition: 'transform 1s linear', // 秒针平滑过渡
+    // animation: `smoothSecondHand 1s linear infinite`
   };
+
 
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
-    transition: 'transform 0.1s linear' // 时针平滑过渡
+    transition: 'transform 1s linear' // 时针平滑过渡
   };
 
   const minuteHandStyle = {
     transform: `rotate(${initialMinuteHandAngle}deg)`,
-    transition: 'transform 0.05s linear' // 分针平滑过渡
+    transition: 'transform 1s linear' // 分针平滑过渡
   };
 
   // 计算每个小时数字的位置
