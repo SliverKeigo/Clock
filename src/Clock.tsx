@@ -130,39 +130,23 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
     setHoveredHand(null);
   };
 
-// 全局变量，保存当前的时间
-  let currentTime = new Date();
 
-
-// 计算秒针的初始角度，考虑到当前秒
-  const initialSecondHandAngle = currentTime.getSeconds() % 60;
-// 计算时针的初始角度
-  const initialHourHandAngle = ((currentTime.getHours() % 12) * 30) + (currentTime.getMinutes() * 0.5);
-// 计算分针的初始角度
-  const initialMinuteHandAngle = currentTime.getMinutes() * 6 + currentTime.getSeconds() * 0.1;
-// 样式对象，包含秒针的初始旋转和CSS动画
+  // 计算秒针的初始角度，考虑到当前秒和毫秒
+  const initialSecondHandAngle = (seconds + milliseconds / 1000) % 60;
+  // 计算时针的初始角度
+  const initialHourHandAngle = ((hours % 12) * 30) + (minutes * 0.5);
+  // 计算分针的初始角度
+  const initialMinuteHandAngle = minutes * 6 + seconds * 0.1;
+  // 样式对象，包含秒针的初始旋转和CSS动画
   const secondHandStyle = {
     transform: `rotate(${initialSecondHandAngle}deg)`,
-    transition: 'transform 0.5s linear', // 秒针平滑过渡
+    transition: 'transform 0.05s linear', // 秒针平滑过渡
     animation: `smoothSecondHand 1s linear infinite`
   };
 
-// 定时器，每秒更新秒针的角度
-  const updateSecondHand = () => {
-    currentTime = new Date();
-    const newSecondHandAngle = currentTime.getSeconds() % 60;
-    secondHandStyle.transform = `rotate(${newSecondHandAngle}deg)`;
-    // 使用requestAnimationFrame()函数更新秒针的角度
-    requestAnimationFrame(updateSecondHand);
-  };
-
-// 启动定时器
-  updateSecondHand();
-
-
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
-    transition: 'transform 0.1s linear' // 时针平滑过渡
+    transition: 'transform 0.01s linear' // 时针平滑过渡
   };
 
   const minuteHandStyle = {
