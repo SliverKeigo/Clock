@@ -135,8 +135,8 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
 
 
 
-  // 计算秒针的初始角度，考虑到当前秒和毫秒
-  const initialSecondHandAngle = (currentTime.getSeconds() + currentTime.getMilliseconds() / 1000) % 60;
+  // 计算秒针的初始角度，考虑到当前秒
+  const initialSecondHandAngle = currentTime.getSeconds();
 // 计算时针的初始角度
   const initialHourHandAngle = ((currentTime.getHours() % 12) * 30) + (currentTime.getMinutes() * 0.5);
 // 计算分针的初始角度
@@ -147,6 +147,16 @@ const Clock = ({h, m, s, ms, isNightMode}: ClockProps) => {
     transition: 'transform 0.5s linear', // 秒针平滑过渡
     animation: `smoothSecondHand 1s linear infinite`
   };
+
+// 定时器，每秒更新秒针的角度
+  const updateSecondHand = () => {
+    currentTime = new Date();
+    const newSecondHandAngle = currentTime.getSeconds();
+    secondHandStyle.transform = `rotate(${newSecondHandAngle}deg)`;
+  };
+
+// 启动定时器
+  setInterval(updateSecondHand, 100);
 
   const hourHandStyle = {
     transform: `rotate(${initialHourHandAngle}deg)`,
